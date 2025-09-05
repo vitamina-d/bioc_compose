@@ -1,10 +1,40 @@
 services: 
   web:
-    build: .
+    build:
+      context: ../bioc_front
+      dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ../bioc_front:/frontend
+      - /frontend/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ../bioc_back
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+#    volumes:
+ #     - ../bioc_back:/app
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: 1
+    depends_on:
+      - bioc
+
+  bioc:
+    build:
+      context: ../bioc_R
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+      - "8787:8787"
+    volumes:
+      - ../bioc_R:/rservice
+    environment:
+      PASSWORD: bioc
+      USER: rstudio
